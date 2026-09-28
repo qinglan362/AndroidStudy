@@ -1,7 +1,10 @@
 package com.example.studya
 
 import android.R.attr.tag
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -15,6 +18,9 @@ import androidx.core.view.WindowInsetsCompat
 import com.google.android.material.appbar.MaterialToolbar
 
 class MainActivity : AppCompatActivity() {
+
+    lateinit var timeChangeReceiver: TimeChangeReceiver
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -57,6 +63,19 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
+        val intentFilter = IntentFilter()
+        intentFilter.addAction("android.intent.action.TIME_TICK")
+        timeChangeReceiver = TimeChangeReceiver()
+        registerReceiver(timeChangeReceiver, intentFilter)
+
+
+        val button5: Button =findViewById<Button>(R.id.button5)
+        button5.setOnClickListener {
+            val intent = Intent("com.example.studya.MY_BROADCAST")
+            intent.setPackage(packageName)
+            sendBroadcast(intent)
+        }
+
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -93,6 +112,12 @@ class MainActivity : AppCompatActivity() {
         super.onSaveInstanceState(outState)
         val tempData = "Something you just typed"
         outState.putString("data_key", tempData)
+    }
+
+    inner class TimeChangeReceiver : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            Toast.makeText(context, "Time has changed", Toast.LENGTH_SHORT).show()
+        }
     }
 
 }
